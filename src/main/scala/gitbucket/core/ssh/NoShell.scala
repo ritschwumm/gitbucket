@@ -15,7 +15,7 @@ class NoShell(sshAddress:SshAddress) extends Factory[Command] {
     private var callback: ExitCallback = null
 
     override def start(env: Environment): Unit = {
-      val user = env.getEnv.get("USER")
+      val user    = sshAddress.genericUser getOrElse env.getEnv.get("USER")
       val message =
         """
           | Welcome to

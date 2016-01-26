@@ -141,7 +141,14 @@ object SystemSettingsService {
       for {
         host <- sshHost if ssh
       }
-      yield SshAddress(host, sshPort.getOrElse(DefaultSshPort))
+      yield SshAddress(
+        host,
+        sshPort.getOrElse(DefaultSshPort),
+        sshGenericUserName
+      )
+
+    def sshGenericUserName:Option[String] =
+      None
   }
 
   case class Ldap(
@@ -169,7 +176,8 @@ object SystemSettingsService {
 
   case class SshAddress(
     host:String,
-    port:Int)
+    port:Int,
+    genericUser:Option[String])
 
   val DefaultSshPort = 29418
   val DefaultSmtpPort = 25
