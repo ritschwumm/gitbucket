@@ -24,6 +24,7 @@ trait SystemSettingsService {
       props.setProperty(Ssh, settings.ssh.toString)
       settings.sshHost.foreach(x => props.setProperty(SshHost, x.trim))
       settings.sshPort.foreach(x => props.setProperty(SshPort, x.toString))
+      props.setProperty(SshGenericUser, settings.sshGenericUser.toString)
       props.setProperty(UseSMTP, settings.useSMTP.toString)
       if(settings.useSMTP) {
         settings.smtp.foreach { smtp =>
@@ -79,6 +80,7 @@ trait SystemSettingsService {
         getValue(props, Ssh, false),
         getOptionValue[String](props, SshHost, None).map(_.trim),
         getOptionValue(props, SshPort, Some(DefaultSshPort)),
+        getValue(props, SshGenericUser, false),
         getValue(props, UseSMTP, getValue(props, Notification, false)),   // handle migration scenario from only notification to useSMTP
         if(getValue(props, UseSMTP, getValue(props, Notification, false))){
           Some(Smtp(
@@ -131,6 +133,7 @@ object SystemSettingsService {
     ssh: Boolean,
     sshHost: Option[String],
     sshPort: Option[Int],
+    sshGenericUser: Boolean,
     useSMTP: Boolean,
     smtp: Option[Smtp],
     ldapAuthentication: Boolean,
@@ -148,7 +151,7 @@ object SystemSettingsService {
       )
 
     def sshGenericUserName:Option[String] =
-      None
+      if (sshGenericUser) Some("git") else None
   }
 
   case class Ldap(
@@ -194,6 +197,7 @@ object SystemSettingsService {
   private val Ssh = "ssh"
   private val SshHost = "ssh.host"
   private val SshPort = "ssh.port"
+  private val SshGenericUser = "ssh.genericUser"
   private val UseSMTP = "useSMTP"
   private val SmtpHost = "smtp.host"
   private val SmtpPort = "smtp.port"

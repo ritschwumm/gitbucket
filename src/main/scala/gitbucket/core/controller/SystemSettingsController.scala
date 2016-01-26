@@ -26,6 +26,7 @@ trait SystemSettingsControllerBase extends ControllerBase {
     "ssh"                      -> trim(label("SSH access", boolean())),
     "sshHost"                  -> trim(label("SSH host", optional(text()))),
     "sshPort"                  -> trim(label("SSH port", optional(number()))),
+    "sshGenericUser"           -> trim(label("SSH generic user", boolean())),
     "useSMTP"                  -> trim(label("SMTP", boolean())),
     "smtp"                     -> optionalIfNotChecked("useSMTP", mapping(
         "host"                     -> trim(label("SMTP Host", text(required))),

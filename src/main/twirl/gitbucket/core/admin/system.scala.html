@@ -126,6 +126,10 @@
                 <span id="error-sshPort" class="error"></span>
               </div>
             </div>
+            <label class="control-label col-md-3" for="sshGenericUser">Generic user "git"</label>
+            <div class="col-md-9">
+              <input type="checkbox" id="sshGenericUser" name="sshGenericUser"@if(settings.sshGenericUser){ checked}/>
+            </div>
           </div>
           <p class="muted">
              Both of SSH host and Base URL are required if SSH access is enabled.
