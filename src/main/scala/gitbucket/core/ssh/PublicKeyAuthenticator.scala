@@ -8,6 +8,7 @@ import gitbucket.core.servlet.Database
 import org.apache.sshd.server.auth.pubkey.PublickeyAuthenticator
 import org.apache.sshd.server.session.ServerSession
 import org.apache.sshd.common.session.Session
+import org.slf4j.LoggerFactory
 
 object PublicKeyAuthenticator {
   // put in the ServerSession here to be read by GitCommand later
@@ -21,6 +22,8 @@ object PublicKeyAuthenticator {
 }
 
 class PublicKeyAuthenticator(genericUser:Option[String]) extends PublickeyAuthenticator with SshKeyService {
+  private val logger = LoggerFactory.getLogger(classOf[PublicKeyAuthenticator])
+
   override def authenticate(username: String, key: PublicKey, session: ServerSession): Boolean =
     genericUser match {
       case Some(generic) => authenticateGenericUser(username, key, session, generic)
@@ -35,7 +38,11 @@ class PublicKeyAuthenticator(genericUser:Option[String]) extends PublickeyAuthen
       .flatMap(SshUtil.str2PublicKey)
       .contains(key)
     if (authenticated) {
+      logger.info(s"authentication as ssh user ${username} succeeded")
       PublicKeyAuthenticator.putUserName(session, username)
+    }
+    else {
+      logger.info(s"authentication as ssh user ${username} failed")
     }
     authenticated
   }
@@ -57,11 +64,21 @@ class PublicKeyAuthenticator(genericUser:Option[String]) extends PublickeyAuthen
       // determine the user - if different accounts share the same key, tough luck
       val uniqueUserName =
         possibleUserNames match {
-          case List(name) => Some(name)
-          case _          => None
+       	  case List()     =>
+            logger.info(s"authentication as generic user ${genericUser} failed, public key not found")
+       	    None
+          case List(name) =>
+            logger.info(s"authentication as generic user ${genericUser} succeeded, identified ${name}")
+            Some(name)
+          case _          =>
+            logger.info(s"authentication as generic user ${genericUser} failed, public key is ambiguous")
+            None
         }
       uniqueUserName.foreach(PublicKeyAuthenticator.putUserName(session, _))
       uniqueUserName.isDefined
     }
-    else false
+    else {
+      logger.info(s"authentication as generic user ${genericUser} failed, ssh user name was ${username}")
+      false
+    }
 }
